@@ -1,0 +1,23 @@
+{
+  "name": "natures",
+  "version": "1.0.0",
+  "description": "Learning Node.js, Express and MongoDB",
+  "homepage": "https://github.com/djGopinath/nature_api#readme",
+  "bugs": {
+    "url": "https://github.com/djGopinath/nature_api/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djGopinath/nature_api.git"
+  },
+  "license": "ISC",
+  "author": "djGopinath",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
