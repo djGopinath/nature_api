@@ -8,7 +8,8 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan('dev'));
-//middleware
+app.use(express.static(`${__dirname}/public`));
+//middleware 
 app.use((req, res, next) => {
   console.log('Middleware: Request received');
   next();
