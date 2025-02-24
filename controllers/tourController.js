@@ -2,8 +2,16 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    // find() is used to et all record
-    const tours = await Tour.find();
+    // Build query ti filter
+     const queryObj={...req.query};
+     const excludedFields=['page','sort','limit','fields'];
+     excludedFields.forEach(field=>delete queryObj[field]);
+     const query =  Tour.find(queryObj);
+     
+     // find() is used to et all record
+     // Excute the filter query and get all record
+    const tours = await query;
+
     res.status(200).json({
       status: 'success',
       total_records: tours.length,
