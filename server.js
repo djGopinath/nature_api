@@ -18,6 +18,7 @@ mongoose
   .then(() => {
     console.log('Connected to MongoDB');
   });
+
 const port = process.env.port || 3000;
 
 app.listen(port, () => {
