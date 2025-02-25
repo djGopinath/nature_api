@@ -20,6 +20,26 @@ exports.getAllTours = async (req, res) => {
      } else {
       query=query.sort('-createdAt');
      }
+
+     // FIELD LIMITING 
+     if(req.query.fields){
+      const fields=req.query.fields.split(',').join(' ');
+       query=query.select(fields);
+     } else{
+      query=query.select('-__v');
+     }
+
+
+     //pagination
+     const page=req.query.page * 1 || 1;
+     const limit=req.query.limit * 1 || 10;
+     const skip=(page-1)*limit; 
+     query=query.skip(skip).limit(limit);
+
+     if(req.query.page){
+      const numTours= await Tour.countDocuments();
+      if(skip >= numTours) throw new Error('This page does not exist')
+     }
      
 
     const tours = await query;
