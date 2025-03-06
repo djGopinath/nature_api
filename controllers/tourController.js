@@ -1,4 +1,5 @@
-const Tour = require('../models/tourModel');
+const Tour=require('./../models/tourModel');
+const APIFeatures=require('./../utils/apiFeatures');
 
 
 exports.aliasTopTours = (req, res, next) => {
@@ -7,59 +8,35 @@ exports.aliasTopTours = (req, res, next) => {
   req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
   next();
 };
+
 exports.getAllTours = async (req, res) => {
   try {
-    // find() is used to et all record
-    // Excute the filter query and get all record
-    // Build query to filter - FILTERING
-     const queryObj={...req.query};
-     const excludedFields=['page','sort','limit','fields'];
-     excludedFields.forEach(field=>delete queryObj[field]);
+    // EXECUTE QUERY
+    const features = new APIFeatures(Tour.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-     let queryStr=JSON.stringify(queryObj);
-     queryStr=queryStr.replace(/\b (gte|gt|lte|lt)\b/g,match=>`$${match}`);
-     let query =  Tour.find(JSON.parse(queryStr));
-
-     //SORTING
-     if(req.query.sort){
-      const sortBy=req.query.sort.split(',').join(' ');
-        query=query.sort(sortBy);
-     } else {
-      query=query.sort('-createdAt');
-     }
-
-     // FIELD LIMITING 
-     if(req.query.fields){
-      const fields=req.query.fields.split(',').join(' ');
-       query=query.select(fields);
-     } else{
-      query=query.select('-__v');
-     }
-
-
-     //pagination
-     const page=req.query.page * 1 || 1;
-     const limit=req.query.limit * 1 || 10;
-     const skip=(page-1)*limit; 
-     query=query.skip(skip).limit(limit);
-
-     if(req.query.page){
-      const numTours= await Tour.countDocuments();
-      if(skip >= numTours) throw new Error('This page does not exist')
-     }
-     
-
-    const tours = await query;
-
+    
+    const tours = await features.query;
+    console.log("API Features",tours);
+    // SEND RESPONSE
     res.status(200).json({
       status: 'success',
-      total_records: tours.length,
-      data: { tours }
+      results: tours.length,
+      data: {
+        tours
+      }
     });
   } catch (err) {
-    res.status(404).json({ status: 'Fail', message: err });
+    res.status(404).json({
+      status: 'failsss',
+      message: err
+    });
   }
 };
+
 exports.getTourById = async (req, res) => {
   try {
     // findById() is used to get a single record
