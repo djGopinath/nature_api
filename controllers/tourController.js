@@ -1,6 +1,7 @@
 const Tour=require('./../models/tourModel');
 const APIFeatures=require('./../utils/apiFeatures');
-const catchAsync=require('../utils/catchAsync')
+const catchAsync = require('../utils/catchAsync');
+const AppError =require('../utils/appError')
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -26,10 +27,19 @@ exports.getAllTours =catchAsync( async (req, res,next) => {
     });
 });
 
-exports.getTourById =catchAsync( async (req, res,next) => {
-    // findById() is used to get a single record
-    const tour = await Tour.findById(req.params.id);
-    res.status(200).json({ status: 'success', data: { tour } });
+
+exports.getTourById= catchAsync(async (req, res, next) => {
+  const tour = await Tour.findById(req.params.id);
+
+  if (!tour) {
+    return next(new AppError('No Tour found with that ID', 404));
+  }
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
 });
 
 exports.createTour =catchAsync( async (req, res,next) => {
@@ -45,13 +55,20 @@ exports.createTour =catchAsync( async (req, res,next) => {
 exports.updateTour =catchAsync( async (req, res,next) => {
   
     // findbyIdAndUpdate is use to update the tour params : id, paylod and validation
+
     const updatedTour= await Tour.findByIdAndUpdate(req.params.id, req.body,{new:true,runValidators:true})
+      if (!updatedTour) {
+    return next(new AppError('No Tour found with that ID', 404));
+  }
     res.status(200).json({ status: 'success', data: updatedTour });
 
 });
 exports.deleteTour = catchAsync(async (req, res,next) => {
     // findbyIdAndDelete is use to delete the tour by id
-    await Tour.findByIdAndDelete(req.params.id);
+    const tour =await Tour.findByIdAndDelete(req.params.id);
+      if (!tour) {
+    return next(new AppError('No Tour found with that ID', 404));
+  }
     res.status(204).json({ status: 'success', data: null });
 });
 
