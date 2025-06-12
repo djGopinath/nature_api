@@ -1,3 +1,4 @@
+const {promisify}=require('util')
 const User =require('../models/userModel');
 const catchAsync=require('../utils/catchAsync');
 const AppError =require('../utils/appError');
@@ -38,3 +39,28 @@ exports.login=catchAsync(async (req,res,next)=>{
         token,
     })
 })
+
+// protected route
+exports.protect=catchAsync(async (req,res,next)=>{
+//Getting token and check it is there 
+let token;
+if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
+    token=req.headers.authorization.split(' ')[1];
+}
+if(!token){
+    return next(new AppError('You are not logged In! please login to get access.',401))
+}
+//verification token
+const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+//check if user still exist
+const currentUser=await User.find(decoded._id);
+if(!currentUser){
+    return next(new AppError('the user belonging to this token does no longer exist.',401))
+}
+//check if user changed password if token was issue.
+if(currentUser.changePasswordAfter(decoded.iat)){
+    return next(new AppError('User recently changed Password! Please login again',401))
+}
+req.User=currentUser;
+next();
+});
