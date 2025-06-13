@@ -53,14 +53,14 @@ if(!token){
 //verification token
 const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 //check if user still exist
-const currentUser=await User.find(decoded._id);
+const currentUser=await User.findById(decoded.id);
 if(!currentUser){
     return next(new AppError('the user belonging to this token does no longer exist.',401))
 }
 //check if user changed password if token was issue.
-if(currentUser.changePasswordAfter(decoded.iat)){
+if(currentUser.changedPasswordAfter(decoded.iat)){
     return next(new AppError('User recently changed Password! Please login again',401))
 }
-req.User=currentUser;
+req.user=currentUser;
 next();
 });
