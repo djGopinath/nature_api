@@ -4,7 +4,7 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Review Cannot empty!']
   },
-  ratting: {
+  rating: {
     type: Number,
     min: 1,
     max: 5
