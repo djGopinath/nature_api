@@ -5,15 +5,22 @@ const helmet=require('helmet');
 const mongoSanitize=require('express-mongo-sanitize');
 const xss=require('xss-clean');
 const hpp=require('hpp');
+const path=require('path');
 
 const AppError=require('./utils/appError');
 const globalErrorHandler=require('./controllers/errorController')
 const tourRouter=require('./routes/tourRoute');
 const userRouter=require('./routes/userRoute');
 const reviewRouter=require('./routes/reviewRoute');
+const viewRouter=require('./routes/viewRoute');
 
 
 const app = express();
+app.set('view engine', 'pug');
+app.set('views',path.join(__dirname,'views'));
+
+// Serving static Files
+app.use(express.static(path.join(__dirname,'public')));
 // set security HTTP Headers
 app.use(helmet());
 
@@ -45,8 +52,6 @@ app.use(hpp({
   whitelist:['duration','ratingsQuantity','ratingsAverage','maxGroupSize','difficulty','price']
 }));
 
-// Serving static Files
-app.use(express.static(`${__dirname}/public`));
 
 // Test Middleware
 app.use((req, res, next) => {
@@ -54,7 +59,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use('/',viewRouter);
 app.use('/api/v1/tours',tourRouter);
 app.use('/api/v1/users',userRouter);
 app.use('/api/v1/reviews',reviewRouter);
